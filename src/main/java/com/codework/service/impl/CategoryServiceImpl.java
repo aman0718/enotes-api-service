@@ -33,19 +33,43 @@ public class CategoryServiceImpl implements CategoryService {
 		// category.setDescription(categoryDto.getDescription());
 		// category.setIsActive(categoryDto.getIsActive());
 
-		// This is done using ModelMapper class. we'll not need above 4 lines to set
-		// parameters. Converting CategoryDTO to Category
+		// This is done using ModelMapper class. 
+		// We'll not need above 4 lines to set parameters. Converting CategoryDTO to Category
+		// Map DTO to Entity
 		Category category = mapper.map(categoryDto, Category.class);
 
+		if (ObjectUtils.isEmpty(category.getId())) {
+			createNewCategory(category);
+		} else {
+			updateCategory(category);
+		}
+
+		Category saveCategory = categoryRepository.save(category);
+		return !ObjectUtils.isEmpty(saveCategory);
+	}
+
+	private void createNewCategory(Category category) {
 		category.setIsDeleted(false);
 		category.setCreatedBy(1);
 		category.setCreatedOn(new Date());
-		Category saveCategory = categoryRepository.save(category);
+	}
 
-		if (ObjectUtils.isEmpty(saveCategory)) {
-			return false;
+	private void updateCategory(Category category) {
+		Optional<Category> findById = categoryRepository.findById(category.getId());
+
+		if (findById.isPresent()) {
+
+			Category existCategory = findById.get();
+
+			//Keep unchanged fields from the existing entity
+			category.setCreatedBy(existCategory.getCreatedBy());
+			category.setCreatedOn(existCategory.getCreatedOn());
+			category.setIsDeleted(existCategory.getIsDeleted());
+
+			// Set updated fields
+			category.setUpdatedBy(1);
+			category.setUpdatedOn(new Date());
 		}
-		return true;
 	}
 
 	@Override
