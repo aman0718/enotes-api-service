@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.codework.dto.CategoryDto;
 import com.codework.dto.CategoryResponse;
+import com.codework.exception.ResourceNotFoundException;
 import com.codework.service.CategoryService;
 
 @RestController
@@ -62,11 +63,18 @@ public class CategoryController {
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getCategoryDetailsById(@PathVariable Integer id) {
 
-		CategoryDto categoryDto = categoryService.getCategoryById(id);
-		if (ObjectUtils.isEmpty(categoryDto)) {
-			return new ResponseEntity<>("Category not found with Id:" + id, HttpStatus.NOT_FOUND);
+		try {
+			CategoryDto categoryDto = categoryService.getCategoryById(id);
+			if (ObjectUtils.isEmpty(categoryDto)) {
+				return new ResponseEntity<>("internal server Error", HttpStatus.NOT_FOUND);
+			}
+			return new ResponseEntity<>(categoryDto, HttpStatus.OK);
+
+		} catch (ResourceNotFoundException e) {
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+		} catch (Exception e) {
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<>(categoryDto, HttpStatus.OK);
 	}
 
 	@DeleteMapping("/{id}")
