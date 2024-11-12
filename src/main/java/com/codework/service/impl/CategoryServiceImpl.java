@@ -1,6 +1,5 @@
 package com.codework.service.impl;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,10 +35,10 @@ public class CategoryServiceImpl implements CategoryService {
 
 		// Validating
 		validation.categoryValidation(categoryDto);
+
 		
-		// This is done using ModelMapper class.
-		// We'll not need above 4 lines to set parameters. Converting CategoryDTO to
-		// Category
+
+		// This is done using ModelMapper class. Converting CategoryDTO to Category
 		// Map DTO to Entity
 		Category category = mapper.map(categoryDto, Category.class);
 
@@ -55,8 +54,8 @@ public class CategoryServiceImpl implements CategoryService {
 
 	private void createNewCategory(Category category) {
 		category.setIsDeleted(false);
-		category.setCreatedBy(1);
-		category.setCreatedOn(new Date());
+		// category.setCreatedBy(1);
+		// category.setCreatedOn(new Date());
 	}
 
 	private void updateCategory(Category category) {
@@ -72,8 +71,8 @@ public class CategoryServiceImpl implements CategoryService {
 			category.setIsDeleted(existCategory.getIsDeleted());
 
 			// Set updated fields
-			category.setUpdatedBy(1);
-			category.setUpdatedOn(new Date());
+			// category.setUpdatedBy(1);
+			// category.setUpdatedOn(new Date());
 		}
 	}
 
