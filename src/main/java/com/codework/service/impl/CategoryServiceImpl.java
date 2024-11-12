@@ -16,6 +16,7 @@ import com.codework.entity.Category;
 import com.codework.exception.ResourceNotFoundException;
 import com.codework.repository.CategoryRepository;
 import com.codework.service.CategoryService;
+import com.codework.util.Validation;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -26,16 +27,16 @@ public class CategoryServiceImpl implements CategoryService {
 	@Autowired
 	private ModelMapper mapper;
 
+	@Autowired
+	private Validation validation;
+
 	@Override
 	@Transactional
 	public Boolean saveCategory(CategoryDto categoryDto) {
 
-		// This is getting done manually
-		// Category category = new Category();
-		// category.setName(categoryDto.getName());
-		// category.setDescription(categoryDto.getDescription());
-		// category.setIsActive(categoryDto.getIsActive());
-
+		// Validating
+		validation.categoryValidation(categoryDto);
+		
 		// This is done using ModelMapper class.
 		// We'll not need above 4 lines to set parameters. Converting CategoryDTO to
 		// Category
