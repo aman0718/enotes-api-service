@@ -13,6 +13,7 @@ import org.springframework.util.ObjectUtils;
 import com.codework.dto.CategoryDto;
 import com.codework.dto.CategoryResponse;
 import com.codework.entity.Category;
+import com.codework.exception.ExistsDataException;
 import com.codework.exception.ResourceNotFoundException;
 import com.codework.repository.CategoryRepository;
 import com.codework.service.CategoryService;
@@ -36,10 +37,14 @@ public class CategoryServiceImpl implements CategoryService {
 
 		// Validating
 		validation.categoryValidation(categoryDto);
-		
-		// This is done using ModelMapper class.
-		// We'll not need above 4 lines to set parameters. Converting CategoryDTO to
-		// Category
+
+		// Validating if category already created or not
+		Boolean existsCategory = categoryRepository.existsByName(categoryDto.getName().trim());
+		if (existsCategory) {
+			throw new ExistsDataException("Category already exists");
+		}
+
+		// This is done using ModelMapper class. Converting CategoryDTO to Category
 		// Map DTO to Entity
 		Category category = mapper.map(categoryDto, Category.class);
 
