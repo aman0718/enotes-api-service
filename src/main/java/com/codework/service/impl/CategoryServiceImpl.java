@@ -38,7 +38,6 @@ public class CategoryServiceImpl implements CategoryService {
 		// Validating
 		validation.categoryValidation(categoryDto);
 
-<<<<<<< Updated upstream
 		// Check category exist or not
 		Boolean existName = categoryRepository.existsByName(categoryDto.getName().trim());
 
@@ -50,10 +49,6 @@ public class CategoryServiceImpl implements CategoryService {
 		// This is done using ModelMapper class.
 		// We'll not need above 4 lines to set parameters. Converting CategoryDTO to
 		// Category
-=======
-		
-		// This is done using ModelMapper class. Converting CategoryDTO to Category
->>>>>>> Stashed changes
 		// Map DTO to Entity
 		Category category = mapper.map(categoryDto, Category.class);
 
