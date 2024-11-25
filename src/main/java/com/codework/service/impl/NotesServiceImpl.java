@@ -14,6 +14,9 @@ import org.apache.commons.io.FilenameUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
@@ -21,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.codework.dto.NotesDto;
 import com.codework.dto.NotesDto.CategoryDto;
+import com.codework.dto.NotesResponse;
 import com.codework.entity.FileDetails;
 import com.codework.entity.Notes;
 import com.codework.exception.ResourceNotFoundException;
@@ -141,13 +145,6 @@ public class NotesServiceImpl implements NotesService {
     }
 
     @Override
-    public List<NotesDto> getAllNotes() {
-
-        return notesRepository.findAll().stream()
-                .map(note -> mapper.map(note, NotesDto.class)).toList();
-    }
-
-    @Override
     public byte[] downloadFile(FileDetails fileDetails) throws Exception {
 
         InputStream io = new FileInputStream(fileDetails.getPath());
@@ -159,6 +156,36 @@ public class NotesServiceImpl implements NotesService {
         FileDetails fileDetails = fileRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("file not available"));
         return fileDetails;
+    }
+
+    @Override
+    public List<NotesDto> getAllNotes() {
+        return notesRepository.findAll().stream()
+                .map(note -> mapper.map(note, NotesDto.class)).toList();
+    }
+
+    @Override
+    public NotesResponse getAllNotesByUser(Integer userId, Integer pageNo, Integer pageSize) {
+
+        // Say-> Total 10 elements. each page should show 5 elements, means 2 pages will
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Page<Notes> notes = notesRepository.findByCreatedBy(userId, pageable);
+
+        // Converting Entity to DTO
+        List<NotesDto> notesDto = notes.get().map(n -> mapper.map(n, NotesDto.class)).toList();
+
+        // Setting up Notes-Response-DTO
+        NotesResponse notesResponse = NotesResponse.builder()
+                .notes(notesDto)
+                .pageNumber(notes.getNumber())
+                .pageSize(notes.getSize())
+                .totalElements(notes.getTotalElements())
+                .totalPages(notes.getTotalPages())
+                .isFirst(notes.isFirst())
+                .isLast(notes.isLast())
+                .build();
+
+        return notesResponse;
     }
 
 }

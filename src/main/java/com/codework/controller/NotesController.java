@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.codework.dto.NotesDto;
+import com.codework.dto.NotesResponse;
 import com.codework.entity.FileDetails;
 import com.codework.service.NotesService;
 import com.codework.util.CommonUtil;
@@ -61,7 +62,18 @@ public class NotesController {
         List<NotesDto> notes = notesService.getAllNotes();
         if (CollectionUtils.isEmpty(notes)) {
             return ResponseEntity.noContent().build();
+
         }
+        return CommonUtil.createBuildResponse(notes, HttpStatus.OK);
+    }
+
+    @GetMapping("/user-notes")
+    public ResponseEntity<?> getAllNotesByUser(@RequestParam(name = "pageNo", defaultValue = "0") Integer pageNo,
+            @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+
+        Integer userId = 2;
+        NotesResponse notes = notesService.getAllNotesByUser(userId, pageNo, pageSize);
+
         return CommonUtil.createBuildResponse(notes, HttpStatus.OK);
     }
 }
