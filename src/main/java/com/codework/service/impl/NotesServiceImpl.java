@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.codework.dto.NotesDto;
 import com.codework.dto.NotesDto.CategoryDto;
+import com.codework.dto.NotesDto.FileDto;
 import com.codework.dto.NotesResponse;
 import com.codework.entity.FileDetails;
 import com.codework.entity.Notes;
@@ -59,30 +61,52 @@ public class NotesServiceImpl implements NotesService {
         ObjectMapper object = new ObjectMapper();
         NotesDto notesDto = object.readValue(notes, NotesDto.class);
 
+        notesDto.setIsDeleted(false);
+        notesDto.setDeletedOn(null);
+
+        // Scope of improvement for better implementation //
+
+        // Checking if ID exists or not
+        if (!ObjectUtils.isEmpty(notesDto.getId())) {
+            updateNotes(notesDto, file);
+        }
+
         // Category Validation
         ValidateCategory(notesDto.getCategory());
 
         // DTO to Entity
         Notes notesEntity = mapper.map(notesDto, Notes.class);
 
-        // Storing files locally on system
-        FileDetails fileDetails = savFileDetails(file);
+        // Validating & Storing files locally on system
+        FileDetails fileDetails = handleFileUpload(file);
 
         if (!ObjectUtils.isEmpty(fileDetails)) {
             notesEntity.setFileDetails(fileDetails);
         } else {
-            notesEntity.setFileDetails(null);
+            if (ObjectUtils.isEmpty(notesDto.getId()))
+                notesEntity.setFileDetails(null);
         }
 
         Notes savedNotes = notesRepository.save(notesEntity);
-
         if (!ObjectUtils.isEmpty(savedNotes)) {
             return true;
         }
         return false;
     }
 
-    private FileDetails savFileDetails(MultipartFile file) throws IOException {
+    private void updateNotes(NotesDto notesDto, MultipartFile file) throws Exception {
+
+        Notes existingNote = notesRepository.findById(notesDto.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid Id"));
+                
+        existingNote.setIsDeleted(false);
+        existingNote.setDeletedOn(null);
+        if (ObjectUtils.isEmpty(file)) {
+            notesDto.setFileDetails(mapper.map(existingNote.getFileDetails(), FileDto.class));
+        }
+    }
+
+    private FileDetails handleFileUpload(MultipartFile file) throws IOException {
 
         if (!ObjectUtils.isEmpty(file) && !file.isEmpty()) {
 
@@ -141,7 +165,7 @@ public class NotesServiceImpl implements NotesService {
 
     private void ValidateCategory(CategoryDto category) throws Exception {
         categoryRepository.findById(category.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category ID is invalid"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category ID " + category.getId() + " is invalid"));
     }
 
     @Override
@@ -169,7 +193,7 @@ public class NotesServiceImpl implements NotesService {
 
         // Say-> Total 10 elements. each page should show 5 elements, means 2 pages will
         Pageable pageable = PageRequest.of(pageNo, pageSize);
-        Page<Notes> notes = notesRepository.findByCreatedBy(userId, pageable);
+        Page<Notes> notes = notesRepository.findByCreatedByAndIsDeletedFalse(userId, pageable);
 
         // Converting Entity to DTO
         List<NotesDto> notesDto = notes.get().map(n -> mapper.map(n, NotesDto.class)).toList();
@@ -186,6 +210,34 @@ public class NotesServiceImpl implements NotesService {
                 .build();
 
         return notesResponse;
+    }
+
+    @Override
+    public void softDeleteNotes(Integer id) throws Exception {
+
+        Notes notes = notesRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Note id is invalid"));
+
+        notes.setIsDeleted(true);
+        notes.setDeletedOn(new Date());
+        notesRepository.save(notes);
+    }
+
+    @Override
+    public void restoreNotes(Integer id) throws Exception {
+        Notes notes = notesRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Note id is invalid"));
+
+        notes.setIsDeleted(false);
+        notes.setDeletedOn(null);
+        notesRepository.save(notes);
+    }
+
+    @Override
+    public List<NotesDto> getRecycleBinNotes(Integer userId) {
+        List<Notes> recycleBinNotes = notesRepository.findByCreatedByAndIsDeletedTrue(userId);
+        List<NotesDto> notesList = recycleBinNotes.stream().map(note -> mapper.map(note, NotesDto.class)).toList();
+        return notesList;
     }
 
 }

@@ -22,6 +22,8 @@ public class NotesDto {
     private Integer updatedBy;
     private Date updatedOn;
     private FileDto fileDetails;
+    private Boolean isDeleted;
+    private Date deletedOn;
 
     @Getter
     @Setter
@@ -32,7 +34,6 @@ public class NotesDto {
         private String originalFileName;
         private String displayFileName;
     }
-
 
     @Getter
     @Setter

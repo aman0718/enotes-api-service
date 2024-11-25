@@ -65,8 +65,8 @@ public class CommonUtil {
                 return "text/plan";
             case "png":
                 return "image/png";
-            case "jpeg":
-                return "application/jpeg";
+            case "jpg":
+                return "application/jpg";
             default:
                 return "application/octet-stream";
         }
