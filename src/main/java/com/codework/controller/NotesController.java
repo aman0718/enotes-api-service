@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.codework.dto.FavouriteNoteDto;
 import com.codework.dto.NotesDto;
 import com.codework.dto.NotesResponse;
 import com.codework.entity.FileDetails;
@@ -30,9 +31,12 @@ public class NotesController {
     @Autowired
     private NotesService notesService;
 
-    //--------------------************************************------------------------
-    //-------------------------------- Save Notes -----------------------------------
-    /*********************------------------------------------***********************/
+    // --------------------************************************------------------------
+    // -------------------------------- Save Notes
+    // -----------------------------------
+    /*********************
+     * ------------------------------------
+     ***********************/
 
     @PostMapping("/save")
     public ResponseEntity<?> saveNotes(@RequestParam String notes, @RequestParam(required = false) MultipartFile file)
@@ -46,9 +50,12 @@ public class NotesController {
         return CommonUtil.createErrorResponseMessage("Notes not saved", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    //--------------------************************************------------------------
-    //------------------------------- File Download ----------------------------------
-    /*********************------------------------------------***********************/
+    // --------------------************************************------------------------
+    // ------------------------------- File Download
+    // ----------------------------------
+    /*********************
+     * ------------------------------------
+     ***********************/
 
     @GetMapping("/download/{id}")
     public ResponseEntity<?> downloadFile(@PathVariable Integer id) throws Exception {
@@ -66,9 +73,12 @@ public class NotesController {
         return ResponseEntity.ok().headers(headers).body(downloadFile);
     }
 
-    //--------------------************************************------------------------
-    //-------------------------------- Fetch Notes  ----------------------------------
-    /*********************------------------------------------***********************/
+    // --------------------************************************------------------------
+    // -------------------------------- Fetch
+    // Notes----------------------------------
+    /*********************
+     * ------------------------------------
+     ***********************/
 
     @GetMapping("/")
     public ResponseEntity<?> getAllNotes() {
@@ -90,10 +100,12 @@ public class NotesController {
         return CommonUtil.createBuildResponse(notes, HttpStatus.OK);
     }
 
-
-    //--------------------************************************------------------------
-    //------------------------------ Delete Notes -----------------------------------
-    /*********************------------------------------------***********************/
+    // --------------------************************************------------------------
+    // ------------------------------ Delete Notes
+    // -----------------------------------
+    /*********************
+     * ------------------------------------
+     ***********************/
 
     @GetMapping("/delete/{id}")
     public ResponseEntity<?> deleteNotes(@PathVariable Integer id) throws Exception {
@@ -134,9 +146,33 @@ public class NotesController {
         return CommonUtil.createBuildResponseMessage("Notes deleted permanently", HttpStatus.OK);
     }
 
-    //--------------------************************************------------------------
-    //-------------------------- Favourite Notes Module ------------------------------
-    /*********************------------------------------------***********************/
-
+    // --------------------************************************------------------------
+    // -------------------------- Favourite Notes Module ------------------------------
     
+
+    @GetMapping("/fav/{noteId}")
+    public ResponseEntity<?> favouriteNote(@PathVariable Integer noteId) throws Exception {
+
+        notesService.favouriteNotes(noteId);
+        return CommonUtil.createBuildResponseMessage("Added to favourites", HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/un-fav/{favNoteId}")
+    public ResponseEntity<?> unfavouriteNote(@PathVariable Integer favNoteId) throws Exception {
+
+        notesService.unFavouriteNotes(favNoteId);
+        return CommonUtil.createBuildResponseMessage("Removed from favourites", HttpStatus.OK);
+    }
+
+    @GetMapping("/favourites")
+    public ResponseEntity<?> getUserFavouriteNotes() throws Exception {
+
+        List<FavouriteNoteDto> userFavouriteNoteDtos = notesService.getUserFavouriteNotes();
+
+        if (CollectionUtils.isEmpty(userFavouriteNoteDtos)) {
+            return ResponseEntity.noContent().build();
+        }
+        return CommonUtil.createBuildResponse(userFavouriteNoteDtos, HttpStatus.OK);
+    }
+
 }

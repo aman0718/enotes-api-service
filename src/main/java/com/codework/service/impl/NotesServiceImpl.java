@@ -24,14 +24,17 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.codework.dto.FavouriteNoteDto;
 import com.codework.dto.NotesDto;
 import com.codework.dto.NotesDto.CategoryDto;
 import com.codework.dto.NotesDto.FileDto;
 import com.codework.dto.NotesResponse;
+import com.codework.entity.FavouriteNote;
 import com.codework.entity.FileDetails;
 import com.codework.entity.Notes;
 import com.codework.exception.ResourceNotFoundException;
 import com.codework.repository.CategoryRepository;
+import com.codework.repository.FavouriteNoteRepository;
 import com.codework.repository.FileRepository;
 import com.codework.repository.NotesRepository;
 import com.codework.service.NotesService;
@@ -48,6 +51,9 @@ public class NotesServiceImpl implements NotesService {
 
     @Autowired
     private FileRepository fileRepository;
+
+    @Autowired
+    private FavouriteNoteRepository favouriteNoteRepository;
 
     @Autowired
     private ModelMapper mapper;
@@ -260,5 +266,39 @@ public class NotesServiceImpl implements NotesService {
         if (!CollectionUtils.isEmpty(recycleBinNotes)) {
             notesRepository.deleteAll(recycleBinNotes);
         }
+    }
+
+    @Override
+    public void favouriteNotes(Integer noteId) throws Exception {
+
+        int usedId = 2;
+
+        Notes note = notesRepository.findById(noteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Note not found"));
+
+        FavouriteNote favouriteNote = FavouriteNote.builder()
+                .note(note)
+                .userId(usedId)
+                .build();
+
+        favouriteNoteRepository.save(favouriteNote);
+    }
+
+    @Override
+    public void unFavouriteNotes(Integer favouriteNoteId) throws Exception {
+
+        FavouriteNote favNote = favouriteNoteRepository.findById(favouriteNoteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid !. This note is not added as favourite"));
+
+        favouriteNoteRepository.delete(favNote);
+    }
+
+    @Override
+    public List<FavouriteNoteDto> getUserFavouriteNotes() throws Exception {
+
+        int userId = 2;
+
+        List<FavouriteNote> favouriteNotes = favouriteNoteRepository.findByUserId(userId);
+        return favouriteNotes.stream().map(fn -> mapper.map(fn, FavouriteNoteDto.class)).toList();
     }
 }
