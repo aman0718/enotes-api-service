@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,6 +30,10 @@ public class NotesController {
     @Autowired
     private NotesService notesService;
 
+    //--------------------************************************------------------------
+    //-------------------------------- Save Notes -----------------------------------
+    /*********************------------------------------------***********************/
+
     @PostMapping("/save")
     public ResponseEntity<?> saveNotes(@RequestParam String notes, @RequestParam(required = false) MultipartFile file)
             throws Exception {
@@ -40,6 +45,10 @@ public class NotesController {
         }
         return CommonUtil.createErrorResponseMessage("Notes not saved", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    //--------------------************************************------------------------
+    //------------------------------- File Download ----------------------------------
+    /*********************------------------------------------***********************/
 
     @GetMapping("/download/{id}")
     public ResponseEntity<?> downloadFile(@PathVariable Integer id) throws Exception {
@@ -56,6 +65,10 @@ public class NotesController {
 
         return ResponseEntity.ok().headers(headers).body(downloadFile);
     }
+
+    //--------------------************************************------------------------
+    //-------------------------------- Fetch Notes  ----------------------------------
+    /*********************------------------------------------***********************/
 
     @GetMapping("/")
     public ResponseEntity<?> getAllNotes() {
@@ -76,6 +89,11 @@ public class NotesController {
 
         return CommonUtil.createBuildResponse(notes, HttpStatus.OK);
     }
+
+
+    //--------------------************************************------------------------
+    //------------------------------ Delete Notes -----------------------------------
+    /*********************------------------------------------***********************/
 
     @GetMapping("/delete/{id}")
     public ResponseEntity<?> deleteNotes(@PathVariable Integer id) throws Exception {
@@ -101,4 +119,24 @@ public class NotesController {
         return CommonUtil.createBuildResponse(notes, HttpStatus.OK);
     }
 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> hardDeleteNotes(@PathVariable Integer id) throws Exception {
+
+        notesService.hardDeleteNotes(id);
+        return CommonUtil.createBuildResponseMessage("Successfully deleted from recycle bin", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete-all")
+    public ResponseEntity<?> emptyRecycleBin() throws Exception {
+
+        int userId = 2;
+        notesService.emptyRecycleBin(userId);
+        return CommonUtil.createBuildResponseMessage("Notes deleted permanently", HttpStatus.OK);
+    }
+
+    //--------------------************************************------------------------
+    //-------------------------- Favourite Notes Module ------------------------------
+    /*********************------------------------------------***********************/
+
+    
 }
