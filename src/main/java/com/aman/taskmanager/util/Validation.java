@@ -1,20 +1,29 @@
 package com.aman.taskmanager.util;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import com.aman.taskmanager.dto.CategoryDto;
 import com.aman.taskmanager.dto.TodoDto;
 import com.aman.taskmanager.dto.TodoDto.StatusDto;
+import com.aman.taskmanager.dto.UserDto;
 import com.aman.taskmanager.enums.TodoStatus;
 import com.aman.taskmanager.exception.ResourceNotFoundException;
 import com.aman.taskmanager.exception.ValidationException;
+import com.aman.taskmanager.repository.RoleRepository;
 
 @Component
 public class Validation {
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     public void categoryValidation(CategoryDto categoryDto) {
 
@@ -74,4 +83,51 @@ public class Validation {
         if (!statusFound)
             throw new ResourceNotFoundException("Invalid staus");
     }
+
+    public void userValidation(UserDto userDto) {
+
+        if (!StringUtils.hasText(userDto.getFirstName())) {
+            throw new IllegalArgumentException("First name shouldn't be null or empty");
+        }
+        if (!StringUtils.hasText(userDto.getLastName())) {
+            throw new IllegalArgumentException("Last name shouldn't be null or empty");
+        }
+
+        if (!StringUtils.hasText(userDto.getEmail()) || !userDto.getEmail().matches(Constants.EMAIL_REGEX)) {
+            throw new IllegalArgumentException("Email shouldn't be invalid");
+        }
+
+        // validation for password
+        if (!StringUtils.hasText(userDto.getPassword())
+                || !userDto.getPassword().matches(Constants.PASSWORD_REGEX)) {
+            throw new IllegalArgumentException("Password should be min of 4 length with one numerical atleast");
+        }
+
+        if (!StringUtils.hasText(userDto.getMobileNumber())
+                || !userDto.getMobileNumber().matches(Constants.MOBILE_NUMBER_REGEX)) {
+            throw new IllegalArgumentException("Mobile number is invalid");
+        }
+
+        // Validate role
+        if (CollectionUtils.isEmpty(userDto.getRoles())) {
+            throw new IllegalArgumentException("Role id is invalid");
+        } else {
+            List<Integer> rolesIds = roleRepository.findAll()
+                    .stream()
+                    .map(r -> r.getId())
+                    .toList();
+
+            List<Integer> invalidRequestRoleIds = userDto.getRoles()
+                    .stream()
+                    .map(r -> r.getId())
+                    .filter(roleId -> !rolesIds.contains((roleId)))
+                    .toList();
+
+            if (!CollectionUtils.isEmpty(invalidRequestRoleIds)) {
+                throw new IllegalArgumentException("Role id is invalid " + invalidRequestRoleIds);
+            }
+        }
+
+    }
+
 }
