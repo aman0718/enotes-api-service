@@ -32,11 +32,7 @@ public class NotesController {
     private NotesService notesService;
 
     // --------------------************************************------------------------
-    // -------------------------------- Save Notes
-    // -----------------------------------
-    /*********************
-     * ------------------------------------
-     ***********************/
+    // -------------------------------- Save Notes -----------------------------------
 
     @PostMapping("/save")
     public ResponseEntity<?> saveNotes(@RequestParam String notes, @RequestParam(required = false) MultipartFile file)
@@ -51,11 +47,8 @@ public class NotesController {
     }
 
     // --------------------************************************------------------------
-    // ------------------------------- File Download
-    // ----------------------------------
-    /*********************
-     * ------------------------------------
-     ***********************/
+    // ------------------------------- File Download ----------------------------------
+    
 
     @GetMapping("/download/{id}")
     public ResponseEntity<?> downloadFile(@PathVariable Integer id) throws Exception {
@@ -74,11 +67,8 @@ public class NotesController {
     }
 
     // --------------------************************************------------------------
-    // -------------------------------- Fetch
-    // Notes----------------------------------
-    /*********************
-     * ------------------------------------
-     ***********************/
+    // -------------------------------- Fetch Notes----------------------------------
+    
 
     @GetMapping("/")
     public ResponseEntity<?> getAllNotes() {
@@ -101,11 +91,7 @@ public class NotesController {
     }
 
     // --------------------************************************------------------------
-    // ------------------------------ Delete Notes
-    // -----------------------------------
-    /*********************
-     * ------------------------------------
-     ***********************/
+    // ------------------------------ Delete Notes -----------------------------------
 
     @GetMapping("/delete/{id}")
     public ResponseEntity<?> deleteNotes(@PathVariable Integer id) throws Exception {
@@ -148,7 +134,6 @@ public class NotesController {
 
     // --------------------************************************------------------------
     // -------------------------- Favourite Notes Module ------------------------------
-    
 
     @GetMapping("/fav/{noteId}")
     public ResponseEntity<?> favouriteNote(@PathVariable Integer noteId) throws Exception {
@@ -173,6 +158,17 @@ public class NotesController {
             return ResponseEntity.noContent().build();
         }
         return CommonUtil.createBuildResponse(userFavouriteNoteDtos, HttpStatus.OK);
+    }
+
+    @GetMapping("/copy/{id}")
+    public ResponseEntity<?> copyNotes(@PathVariable Integer id) throws Exception {
+
+        Boolean copyNotes = notesService.copyNotes(id);
+
+        if (copyNotes)
+            return CommonUtil.createBuildResponseMessage("Note copied successfully", HttpStatus.CREATED);
+
+        return CommonUtil.createBuildResponseMessage("Note copy failed", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }
