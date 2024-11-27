@@ -21,12 +21,12 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserDto userDto) {
+        
         Boolean registerUser = userService.register(userDto);
         if (registerUser) {
             return CommonUtil.createBuildResponseMessage("User registered", HttpStatus.CREATED);
         }
         return CommonUtil.createErrorResponseMessage("User not registered", HttpStatus.INTERNAL_SERVER_ERROR);
-
     }
 
 }

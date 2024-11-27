@@ -15,15 +15,20 @@ import com.aman.taskmanager.dto.TodoDto;
 import com.aman.taskmanager.dto.TodoDto.StatusDto;
 import com.aman.taskmanager.dto.UserDto;
 import com.aman.taskmanager.enums.TodoStatus;
+import com.aman.taskmanager.exception.ExistsDataException;
 import com.aman.taskmanager.exception.ResourceNotFoundException;
 import com.aman.taskmanager.exception.ValidationException;
 import com.aman.taskmanager.repository.RoleRepository;
+import com.aman.taskmanager.repository.UserRepository;
 
 @Component
 public class Validation {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public void categoryValidation(CategoryDto categoryDto) {
 
@@ -95,6 +100,12 @@ public class Validation {
 
         if (!StringUtils.hasText(userDto.getEmail()) || !userDto.getEmail().matches(Constants.EMAIL_REGEX)) {
             throw new IllegalArgumentException("Email shouldn't be invalid");
+        } else {
+            // validate email existing
+            Boolean existEmail = userRepository.existsByEmail(userDto.getEmail());
+            if (existEmail) {
+                throw new ExistsDataException("Email already registered");
+            }
         }
 
         // validation for password
@@ -127,7 +138,6 @@ public class Validation {
                 throw new IllegalArgumentException("Role id is invalid " + invalidRequestRoleIds);
             }
         }
-
     }
 
 }
