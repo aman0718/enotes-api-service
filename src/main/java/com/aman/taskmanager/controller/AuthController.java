@@ -13,15 +13,15 @@ import com.aman.taskmanager.service.UserService;
 import com.aman.taskmanager.util.CommonUtil;
 
 @RestController
-@RequestMapping("/api/v1/user")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
 
     @Autowired
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserDto userDto) {
-        
+    public ResponseEntity<?> registerUser(@RequestBody UserDto userDto) throws Exception {
+
         Boolean registerUser = userService.register(userDto);
         if (registerUser) {
             return CommonUtil.createBuildResponseMessage("User registered", HttpStatus.CREATED);

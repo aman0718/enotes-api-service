@@ -36,7 +36,10 @@ public class TodoServiceImpl implements ToDoService {
 
         Todo todo = mapper.map(todoDto, Todo.class);
 
-        todo.setStatusId(todoDto.getStatus().getId());
+        // Convert the string status to StatusDto
+        setStatus(todoDto, todo);
+
+        // todo.setStatusId(todoDto.getStatus().getId());
 
         Todo saveTodo = todoRepository.save(todo);
 
@@ -44,6 +47,20 @@ public class TodoServiceImpl implements ToDoService {
             return true;
         }
         return false;
+    }
+
+    private void setStatus(TodoDto todoDto, Todo todo) {
+        for (TodoStatus st : TodoStatus.values()) {
+            if (st.getId().equals(todo.getStatusId())) {
+
+                StatusDto statusDto = StatusDto.builder()
+                        .id(st.getId())
+                        .name(st.getStatus())
+                        .build();
+                todoDto.setStatus(statusDto);
+                todo.setStatusId(st.getId());
+            }
+        }
     }
 
     @Override
@@ -57,19 +74,6 @@ public class TodoServiceImpl implements ToDoService {
         return todoDto;
     }
 
-    private void setStatus(TodoDto todoDto, Todo todo) {
-        for (TodoStatus st : TodoStatus.values()) {
-            if (st.getId().equals(todo.getStatusId())) {
-
-                StatusDto statusDto = StatusDto.builder()
-                        .id(st.getId())
-                        .name(st.getStatus())
-                        .build();
-                todoDto.setStatus(statusDto);
-            }
-        }
-    }
-
     @Override
     public List<TodoDto> getToDoByUser() {
 
@@ -77,11 +81,11 @@ public class TodoServiceImpl implements ToDoService {
 
         List<Todo> tasks = todoRepository.findByCreatedBy(userId);
         return tasks.stream().map(td -> {
-            
+
             TodoDto todoDto = mapper.map(td, TodoDto.class);
             setStatus(todoDto, td);
             return todoDto;
         })
-        .toList();
+                .toList();
     }
 }
