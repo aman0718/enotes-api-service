@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 
 import com.aman.taskmanager.handler.GenericResponse;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 public class CommonUtil {
 
     public static ResponseEntity<?> createBuildResponse(Object data, HttpStatus status) {
@@ -70,6 +72,13 @@ public class CommonUtil {
             default:
                 return "application/octet-stream";
         }
+    }
+
+    public static String getUrl(HttpServletRequest httpRequest) {
+        String hostURL = httpRequest.getRequestURL().toString();
+        httpRequest.getServletPath();
+        hostURL = hostURL.replace(httpRequest.getServletPath(), "");
+        return hostURL;
     }
 
 }

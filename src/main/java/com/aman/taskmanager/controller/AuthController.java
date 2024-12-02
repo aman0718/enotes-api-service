@@ -12,6 +12,8 @@ import com.aman.taskmanager.dto.UserDto;
 import com.aman.taskmanager.service.UserService;
 import com.aman.taskmanager.util.CommonUtil;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
@@ -20,9 +22,12 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserDto userDto) throws Exception {
+    public ResponseEntity<?> registerUser(@RequestBody UserDto userDto, HttpServletRequest httpRequest)
+            throws Exception {
 
-        Boolean registerUser = userService.register(userDto);
+        String url = CommonUtil.getUrl(httpRequest);
+
+        Boolean registerUser = userService.register(userDto, url);
         if (registerUser) {
             return CommonUtil.createBuildResponseMessage("User registered", HttpStatus.CREATED);
         }
