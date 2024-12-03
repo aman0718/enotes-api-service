@@ -5,10 +5,17 @@ import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import com.aman.taskmanager.config.security.CustomUserDetails;
 import com.aman.taskmanager.dto.EmailRequest;
+import com.aman.taskmanager.dto.LoginRequest;
+import com.aman.taskmanager.dto.LoginResponse;
 import com.aman.taskmanager.dto.UserDto;
 import com.aman.taskmanager.entity.AccountStatus;
 import com.aman.taskmanager.entity.Role;
@@ -37,6 +44,12 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
     @Override
     public Boolean register(UserDto userDto, String url) throws Exception {
 
@@ -51,6 +64,7 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         user.setAccountStatus(status);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         userRepository.save(user);
 
@@ -79,7 +93,7 @@ public class UserServiceImpl implements UserService {
                 "Thanks, <br>Enotes Services";
 
         messageBody = messageBody.replace("[[username]]", user.getFirstName());
-        messageBody = messageBody.replace("[[url]]", url +"/api/v1/home/verify?uid=" + user.getId()
+        messageBody = messageBody.replace("[[url]]", url + "/api/v1/home/verify?uid=" + user.getId()
                 + "&&code=" + user.getAccountStatus().getVerificationCode());
 
         EmailRequest emailRequest = EmailRequest.builder()
@@ -91,4 +105,20 @@ public class UserServiceImpl implements UserService {
         emailService.sendEmail(emailRequest);
     }
 
+    @Override
+    public LoginResponse login(LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+
+        if (authentication.isAuthenticated()) {
+            CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+            String token = "abcdefg";
+            LoginResponse loginResponse = LoginResponse.builder()
+                    .userDto(mapper.map(customUserDetails.getUser(), UserDto.class))
+                    .token(token)
+                    .build();
+            return loginResponse;
+        }
+        return null;
+    }
 }
