@@ -43,9 +43,12 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 
         httpSecurity.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(req -> req.requestMatchers("/api/v1/home/**", "/api/v1/auth/**").permitAll()
-                        .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults());
+            .authorizeHttpRequests(req -> req.requestMatchers(
+                "/api/v1/home/**",
+                "/api/v1/auth/**")
+                .permitAll()  
+                .anyRequest().authenticated())
+            .httpBasic(Customizer.withDefaults());
 
         return httpSecurity.build();
     }

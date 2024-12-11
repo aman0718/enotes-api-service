@@ -23,6 +23,7 @@ import com.aman.taskmanager.entity.User;
 import com.aman.taskmanager.repository.RoleRepository;
 import com.aman.taskmanager.repository.UserRepository;
 import com.aman.taskmanager.service.EmailService;
+import com.aman.taskmanager.service.JwtService;
 import com.aman.taskmanager.service.UserService;
 import com.aman.taskmanager.util.Validation;
 
@@ -49,6 +50,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtService jwtService;
 
     @Override
     public Boolean register(UserDto userDto, String url) throws Exception {
@@ -112,7 +116,9 @@ public class UserServiceImpl implements UserService {
 
         if (authentication.isAuthenticated()) {
             CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-            String token = "abcdefg";
+
+            String token = jwtService.generateToken(customUserDetails.getUser());
+
             LoginResponse loginResponse = LoginResponse.builder()
                     .userDto(mapper.map(customUserDetails.getUser(), UserDto.class))
                     .token(token)

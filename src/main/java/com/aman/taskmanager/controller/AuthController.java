@@ -45,7 +45,6 @@ public class AuthController {
             return CommonUtil.createErrorResponseMessage("Invalid credentials", HttpStatus.BAD_REQUEST);
         }
         return CommonUtil.createBuildResponse(loginResponse, HttpStatus.OK);
-
     }
 
 }
