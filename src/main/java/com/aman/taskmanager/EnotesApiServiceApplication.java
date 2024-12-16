@@ -23,7 +23,7 @@ public class EnotesApiServiceApplication {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**") // Allow all endpoints
-						.allowedOrigins("http://localhost:3000") // Replace with your frontend URL
+						.allowedOrigins("http://localhost:5173") // Replace with your frontend URL
 						.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allow these HTTP methods
 						.allowedHeaders("*") // Allow all headers
 						.allowCredentials(true); // Allow cookies/credentials
