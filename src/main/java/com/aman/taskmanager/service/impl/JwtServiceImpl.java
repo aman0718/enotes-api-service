@@ -13,9 +13,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.aman.taskmanager.entity.User;
+import com.aman.taskmanager.exception.JwtTokenExpiredException;
 import com.aman.taskmanager.service.JwtService;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -48,7 +51,7 @@ public class JwtServiceImpl implements JwtService {
                 .claims().add(claims)
                 .subject(user.getEmail())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 60 * 60 * 60*10))
+                .expiration(new Date(System.currentTimeMillis() + 60 * 60 * 10))
                 .and()
                 .signWith(getKey())
                 .compact();
@@ -68,14 +71,27 @@ public class JwtServiceImpl implements JwtService {
         return claims.getSubject();
     }
 
-    private Claims extractAllClaims(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(decryptKey(secretKey))
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+    public String role(String token) {
+        Claims claims = extractAllClaims(token);
+        String role = claims.get("role").toString();
+        return role;
+    }
 
-        return claims;
+    private Claims extractAllClaims(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(decryptKey(secretKey))
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+        } catch (ExpiredJwtException e) {
+            throw new JwtTokenExpiredException("Token is expired");
+        } catch (JwtException e) {
+            throw new JwtTokenExpiredException("Token is invalid");
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     private SecretKey decryptKey(String secretKey) {
