@@ -16,7 +16,7 @@ import com.aman.taskmanager.config.security.CustomUserDetails;
 import com.aman.taskmanager.dto.EmailRequest;
 import com.aman.taskmanager.dto.LoginRequest;
 import com.aman.taskmanager.dto.LoginResponse;
-import com.aman.taskmanager.dto.UserDto;
+import com.aman.taskmanager.dto.UserRequest;
 import com.aman.taskmanager.entity.AccountStatus;
 import com.aman.taskmanager.entity.Role;
 import com.aman.taskmanager.entity.User;
@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
     private JwtService jwtService;
 
     @Override
-    public Boolean register(UserDto userDto, String url) throws Exception {
+    public Boolean register(UserRequest userDto, String url) throws Exception {
 
         validation.userValidation(userDto);
 
@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
-    private void setRoles(UserDto userDto, User user) {
+    private void setRoles(UserRequest userDto, User user) {
 
         List<Integer> reqRoleId = userDto.getRoles().stream().map(r -> r.getId()).toList();
         List<Role> roles = roleRepository.findAllById(reqRoleId);
@@ -120,7 +120,7 @@ public class UserServiceImpl implements UserService {
             String token = jwtService.generateToken(customUserDetails.getUser());
 
             LoginResponse loginResponse = LoginResponse.builder()
-                    .userDto(mapper.map(customUserDetails.getUser(), UserDto.class))
+                    .userDto(mapper.map(customUserDetails.getUser(), UserRequest.class))
                     .token(token)
                     .build();
             return loginResponse;

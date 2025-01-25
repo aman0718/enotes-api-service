@@ -16,7 +16,7 @@ public interface NotesService {
 
     public List<NotesDto> getAllNotes();
 
-    public NotesResponse getAllNotesByUser(Integer userId, Integer pageNo, Integer pageSize);
+    public NotesResponse getAllNotesByUser(Integer pageNo, Integer pageSize);
 
     public byte[] downloadFile(FileDetails fileDetails) throws Exception;
 
@@ -26,11 +26,11 @@ public interface NotesService {
 
     public void restoreNotes(Integer id) throws Exception;
 
-    public List<NotesDto> getRecycleBinNotes(Integer userId);
+    public List<NotesDto> getRecycleBinNotes();
 
     public void hardDeleteNotes(Integer id) throws Exception;
 
-    public void emptyRecycleBin(int userId);
+    public void emptyRecycleBin();
 
     public void favouriteNotes(Integer noteId) throws Exception;
 

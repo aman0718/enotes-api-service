@@ -37,7 +37,7 @@ public class NotesController {
     // -----------------------------------
 
     @PostMapping("/save")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> saveNotes(@RequestParam String notes, @RequestParam(required = false) MultipartFile file)
             throws Exception {
 
@@ -70,12 +70,11 @@ public class NotesController {
         return ResponseEntity.ok().headers(headers).body(downloadFile);
     }
 
-    // --------------------************************************------------------------
-    // -------------------------------- Fetch
-    // Notes----------------------------------
+    // --------------------************************************----------------------
+    // -------------------------------- Fetch Notes----------------------------------
 
     @GetMapping("/")
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getAllNotes() {
         List<NotesDto> notes = notesService.getAllNotes();
         if (CollectionUtils.isEmpty(notes)) {
@@ -86,13 +85,11 @@ public class NotesController {
     }
 
     @GetMapping("/user-notes")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getAllNotesByUser(@RequestParam(name = "pageNo", defaultValue = "0") Integer pageNo,
             @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
 
-        Integer userId = 2;
-        NotesResponse notes = notesService.getAllNotesByUser(userId, pageNo, pageSize);
-
+        NotesResponse notes = notesService.getAllNotesByUser(pageNo, pageSize);
         return CommonUtil.createBuildResponse(notes, HttpStatus.OK);
     }
 
@@ -101,7 +98,7 @@ public class NotesController {
     // -----------------------------------
 
     @GetMapping("/delete/{id}")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> deleteNotes(@PathVariable Integer id) throws Exception {
 
         notesService.softDeleteNotes(id);
@@ -117,11 +114,10 @@ public class NotesController {
     }
 
     @GetMapping("/recycle-bin")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getUserRecycleBinNotes() throws Exception {
 
-        Integer userId = 2;
-        List<NotesDto> notes = notesService.getRecycleBinNotes(userId);
+        List<NotesDto> notes = notesService.getRecycleBinNotes();
         if (CollectionUtils.isEmpty(notes))
             return CommonUtil.createBuildResponseMessage("Recycle bin is empty!", HttpStatus.NOT_FOUND);
         return CommonUtil.createBuildResponse(notes, HttpStatus.OK);
@@ -137,16 +133,15 @@ public class NotesController {
 
     @DeleteMapping("/delete-all")
     @PreAuthorize("hasAnyRole('USER')")
-    public ResponseEntity<?> emptyRecycleBin() throws Exception {
+    public ResponseEntity<?> emptyUserRecycleBin() throws Exception {
 
-        int userId = 2;
-        notesService.emptyRecycleBin(userId);
+        notesService.emptyRecycleBin();
         return CommonUtil.createBuildResponseMessage("Notes deleted permanently", HttpStatus.OK);
     }
 
     // --------------------************************************------------------------
     // -------------------------- Favourite Notes Module
-    // ------------------------------
+    // -----------------------------
 
     @GetMapping("/fav/{noteId}")
     @PreAuthorize("hasAnyRole('USER')")

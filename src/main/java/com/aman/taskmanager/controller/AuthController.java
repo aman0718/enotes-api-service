@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.aman.taskmanager.dto.LoginRequest;
 import com.aman.taskmanager.dto.LoginResponse;
-import com.aman.taskmanager.dto.UserDto;
+import com.aman.taskmanager.dto.UserRequest;
 import com.aman.taskmanager.service.UserService;
 import com.aman.taskmanager.util.CommonUtil;
 
@@ -25,7 +25,7 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserDto userDto, HttpServletRequest httpRequest)
+    public ResponseEntity<?> registerUser(@RequestBody UserRequest userDto, HttpServletRequest httpRequest)
             throws Exception {
 
         String url = CommonUtil.getUrl(httpRequest);

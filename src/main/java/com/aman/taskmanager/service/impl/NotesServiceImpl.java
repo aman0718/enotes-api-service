@@ -26,9 +26,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.aman.taskmanager.dto.FavouriteNoteDto;
 import com.aman.taskmanager.dto.NotesDto;
-import com.aman.taskmanager.dto.NotesResponse;
 import com.aman.taskmanager.dto.NotesDto.CategoryDto;
 import com.aman.taskmanager.dto.NotesDto.FileDto;
+import com.aman.taskmanager.dto.NotesResponse;
 import com.aman.taskmanager.entity.FavouriteNote;
 import com.aman.taskmanager.entity.FileDetails;
 import com.aman.taskmanager.entity.Notes;
@@ -38,6 +38,7 @@ import com.aman.taskmanager.repository.FavouriteNoteRepository;
 import com.aman.taskmanager.repository.FileRepository;
 import com.aman.taskmanager.repository.NotesRepository;
 import com.aman.taskmanager.service.NotesService;
+import com.aman.taskmanager.util.CommonUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -196,8 +197,10 @@ public class NotesServiceImpl implements NotesService {
     }
 
     @Override
-    public NotesResponse getAllNotesByUser(Integer userId, Integer pageNo, Integer pageSize) {
+    public NotesResponse getAllNotesByUser(Integer pageNo, Integer pageSize) {
 
+        Integer userId = CommonUtil.getLoggedInUser().getId();
+        
         // Say-> Total 10 elements. each page should show 5 elements, means 2 pages will
         Pageable pageable = PageRequest.of(pageNo, pageSize);
         Page<Notes> notes = notesRepository.findByCreatedByAndIsDeletedFalse(userId, pageable);
@@ -241,7 +244,8 @@ public class NotesServiceImpl implements NotesService {
     }
 
     @Override
-    public List<NotesDto> getRecycleBinNotes(Integer userId) {
+    public List<NotesDto> getRecycleBinNotes() {
+        Integer userId = CommonUtil.getLoggedInUser().getId();
         List<Notes> recycleBinNotes = notesRepository.findByCreatedByAndIsDeletedTrue(userId);
         List<NotesDto> notesList = recycleBinNotes.stream().map(note -> mapper.map(note, NotesDto.class)).toList();
         return notesList;
@@ -260,7 +264,9 @@ public class NotesServiceImpl implements NotesService {
     }
 
     @Override
-    public void emptyRecycleBin(int userId) {
+    public void emptyRecycleBin() {
+
+        Integer userId = CommonUtil.getLoggedInUser().getId();
         List<Notes> recycleBinNotes = notesRepository.findByCreatedByAndIsDeletedTrue(userId);
 
         if (!CollectionUtils.isEmpty(recycleBinNotes)) {
@@ -296,7 +302,7 @@ public class NotesServiceImpl implements NotesService {
     @Override
     public List<FavouriteNoteDto> getUserFavouriteNotes() throws Exception {
 
-        int userId = 2;
+        Integer userId = CommonUtil.getLoggedInUser().getId();
 
         List<FavouriteNote> favouriteNotes = favouriteNoteRepository.findByUserId(userId);
         return favouriteNotes.stream().map(fn -> mapper.map(fn, FavouriteNoteDto.class)).toList();
@@ -319,7 +325,6 @@ public class NotesServiceImpl implements NotesService {
                 .fileDetails(null)
                 .build();
 
-                
         // TODO: Need to check User Validation
         Notes saveNote = notesRepository.save(copyNote);
         if (!ObjectUtils.isEmpty(saveNote))

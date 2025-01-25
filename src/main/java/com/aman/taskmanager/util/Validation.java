@@ -13,7 +13,7 @@ import org.springframework.util.StringUtils;
 import com.aman.taskmanager.dto.CategoryDto;
 import com.aman.taskmanager.dto.TodoDto;
 import com.aman.taskmanager.dto.TodoDto.StatusDto;
-import com.aman.taskmanager.dto.UserDto;
+import com.aman.taskmanager.dto.UserRequest;
 import com.aman.taskmanager.enums.TodoStatus;
 import com.aman.taskmanager.exception.ExistsDataException;
 import com.aman.taskmanager.exception.ResourceNotFoundException;
@@ -89,7 +89,7 @@ public class Validation {
             throw new ResourceNotFoundException("Invalid staus");
     }
 
-    public void userValidation(UserDto userDto) {
+    public void userValidation(UserRequest userDto) {
 
         if (!StringUtils.hasText(userDto.getFirstName())) {
             throw new IllegalArgumentException("First name shouldn't be null or empty");
